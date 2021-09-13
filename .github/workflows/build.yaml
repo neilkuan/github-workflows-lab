@@ -17,18 +17,21 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-      # - if: steps.git_diff.outputs.has_changes
-      #   name: Update status check (if changed)
-      #   run: gh api -X POST /repos/${{ github.event.pull_request.head.repo.full_name
-      #     }}/check-runs -F name="build" -F head_sha="$(git rev-parse HEAD)" -F
-      #     status="completed" -F conclusion="success"
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # - if: steps.git_diff.outputs.has_changes
-      #   name: Cancel workflow (if changed)
-      #   run: gh api -X POST /repos/${{ github.event.pull_request.head.repo.full_name
-      #     }}/actions/runs/${{ github.run_id }}/cancel
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Test
-        run: echo ${{ github.event.pull_request.head.ref }}
+      - name: Set Dev ENV
+        id: set_id
+        env:
+          DEV_SECRET: ${{ secrets.DEV_SECRET }}
+          PROD_SECRET: ${{ secrets.MAIN_SECRET }}
+        run: |
+          [ ${{ github.ref }} == 'refs/heads/dev' ] && echo "::set-output name=final_secret::$DEV_SECRET"
+          [ ${{ github.ref }} == 'refs/heads/main' ] && echo "::set-output name=final_secret::$PROD_SECRET"
+      - name: Do something job. 
+        ## Create example output 
+        ## ${{ github.ref }} = refs/pull/1/merge 
+        ## ${{ github.event.pull_request.head.ref }} = dev
+        run: |-
+         [ ${{ steps.set_id.outputs.final_secret }} == main_secret ] && export FINAL=main
+         [ ${{ steps.set_id.outputs.final_secret }} == dev_secret ] && export FINAL=dev
+         echo "::group::My title"
+         echo "Inside group $FINAL"
+         echo "::endgroup::"
