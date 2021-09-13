@@ -23,15 +23,15 @@ jobs:
           DEV_SECRET: ${{ secrets.DEV_SECRET }}
           PROD_SECRET: ${{ secrets.MAIN_SECRET }}
         run: |
-          [ ${{ github.ref }} == 'refs/heads/dev' ] && echo "::set-output name=final_secret::$DEV_SECRET"
-          [ ${{ github.ref }} == 'refs/heads/main' ] && echo "::set-output name=final_secret::$PROD_SECRET"
+          [ ${{ github.ref }} == 'refs/heads/dev' ] && echo "::set-output name=final_secret::$DEV_SECRET" || echo "not me"
+          [ ${{ github.ref }} == 'refs/heads/main' ] && echo "::set-output name=final_secret::$PROD_SECRET" || echo "not me"
       - name: Do something job. 
         ## Create example output 
         ## ${{ github.ref }} = refs/pull/1/merge 
         ## ${{ github.event.pull_request.head.ref }} = dev
         run: |-
-         [ ${{ steps.set_id.outputs.final_secret }} == main_secret ] && export FINAL=main
-         [ ${{ steps.set_id.outputs.final_secret }} == dev_secret ] && export FINAL=dev
+         [ ${{ steps.set_id.outputs.final_secret }} == main_secret ] && export FINAL=main || echo "not me"
+         [ ${{ steps.set_id.outputs.final_secret }} == dev_secret ] && export FINAL=dev || echo "not me"
          echo "::group::My title"
          echo "Inside group $FINAL"
          echo "::endgroup::"
